@@ -9,6 +9,7 @@ import { TaskProvider } from "./context/TaskContext";
 import Profile from "./pages/Profile";
 import ProfileDetails from "./pages/ProfileDetails";
 
+
 function Layout({ children }) {
   return (
     <div className="min-h-screen w-screen overflow-x-hidden bg-gradient-to-br from-gray-900 to-gray-800 text-white">
