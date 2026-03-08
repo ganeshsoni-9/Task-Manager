@@ -22,12 +22,13 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const [currentDay, setCurrentDay] = useState(1);
 
-  // 📅 Monthly Data
+  // 📅 Months List
   const months = [
     "Jan","Feb","Mar","Apr","May","Jun",
     "Jul","Aug","Sep","Oct","Nov","Dec"
   ];
 
+  // 📊 Monthly Analytics
   const monthlyData = months.map((month, index) => {
 
     const created = tasks.filter(task => {
@@ -43,7 +44,40 @@ export default function Home() {
     }).length;
 
     return { month, created, completed };
+
   });
+
+  // 📅 Day Wise Analytics (Last 7 Days)
+  const last7Days = [];
+
+  for (let i = 6; i >= 0; i--) {
+
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+
+    const label = `${date.getDate()}/${date.getMonth() + 1}`;
+
+    const created = tasks.filter(task => {
+      if (!task.dueDate) return false;
+      const d = new Date(task.dueDate);
+      return d.toDateString() === date.toDateString();
+    }).length;
+
+    const completed = tasks.filter(task => {
+      if (!task.dueDate) return false;
+      const d = new Date(task.dueDate);
+      return task.completed && d.toDateString() === date.toDateString();
+    }).length;
+
+    last7Days.push({
+      day: label,
+      created,
+      completed
+    });
+
+  }
+
+  const dayData = last7Days;
 
   // 🔥 Alarm Logic
   useEffect(() => {
@@ -52,8 +86,8 @@ export default function Home() {
     const lastCompletedDate = localStorage.getItem("lastCompletedDate");
     const today = new Date().toDateString();
 
-    // Agar kal complete hua tha aur aaj new day hai
     if (lastCompletedDate && lastCompletedDate !== today) {
+
       const nextDay = savedDay + 1;
 
       setCurrentDay(nextDay);
@@ -61,6 +95,7 @@ export default function Home() {
 
       localStorage.setItem("currentDay", nextDay);
       localStorage.setItem("lastCompletedDate", today);
+
     } else {
       setCurrentDay(savedDay);
     }
@@ -70,7 +105,8 @@ export default function Home() {
   // ✅ Complete Day Function
   const completeDayTasks = () => {
 
-    const allCompleted = tasks.length > 0 && tasks.every(task => task.completed);
+    const allCompleted =
+      tasks.length > 0 && tasks.every(task => task.completed);
 
     if (!allCompleted) {
       alert("Complete all tasks first ❌");
@@ -80,7 +116,7 @@ export default function Home() {
     const today = new Date().toDateString();
     localStorage.setItem("lastCompletedDate", today);
 
-    alert("Day Completed ✅");
+    alert("Day Completed please focus on next day✅");
   };
 
   return (
@@ -111,13 +147,32 @@ export default function Home() {
         </h2>
 
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={monthlyData}>
+          <BarChart data={monthlyData} barCategoryGap="30%">
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="month" />
             <YAxis />
             <Tooltip />
             <Legend />
             <Bar dataKey="created" fill="#3b82f6" />
+            <Bar dataKey="completed" fill="#22c55e" />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* 📅 Day Wise Analytics */}
+      <div className="w-full max-w-4xl h-96 mb-10">
+        <h2 className="font-bold mb-4 text-center text-xl">
+          Day Wise Analytics (Last 7 Days)
+        </h2>
+
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={dayData} barCategoryGap="30%">
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="day" />
+            <YAxis />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="created" fill="#6366f1" />
             <Bar dataKey="completed" fill="#22c55e" />
           </BarChart>
         </ResponsiveContainer>
